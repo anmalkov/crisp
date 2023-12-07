@@ -1,0 +1,76 @@
+/* Provide sufficient contrast against white background */
+a {
+  color: #0366d6;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+code {
+  color: #E01A76;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+svg {
+    margin-top: -4px;
+}
+
+@media (prefers-color-scheme: dark) {
+    .table {
+        --bs-table-hover-color: white;
+        --bs-table-hover-bg: #111111;
+        --bs-table-color: #afafaf;
+        --bs-table-bg: transparent;
+        --bs-table-border-color: #666666;
+    }
+
+    .list-group {
+        --bs-list-group-bg: #282828;
+        --bs-list-group-color: #afafaf;
+        --bs-list-group-action-hover-color: #cccccc;
+        --bs-list-group-action-hover-bg: #222222;
+        --bs-list-group-action-active-color: white;
+        --bs-list-group-action-active-bg: #111111;
+    }
+
+    .navbar {
+        --bs-navbar-brand-hover-color: #cccccc;
+        --bs-navbar-brand-color: white;
+        --bs-navbar-color: #cccccc;
+        --bs-navbar-hover-color: white;
+        --bs-navbar-active-color: white;
+    }
+
+    body {
+        background-color: #1a1a1a;
+        color: #afafaf;
+    }
+
+    nav.navbar-light {
+        background-color: #111111;
+    }
+
+    nav.border-bottom {
+        border-bottom-color: #333333 !important;
+    }
+
+    table > thead {
+        color: #cccccc !important;
+    }
+
+    .bg-super-light {
+        background: #333333;
+    }
+
+    input, select, textarea {
+        background-color: #333333 !important;
+        color: #afafaf !important;
+        border-color: #666666 !important;
+    }
+}

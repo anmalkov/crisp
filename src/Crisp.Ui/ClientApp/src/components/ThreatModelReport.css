@@ -1,0 +1,10 @@
+﻿#markdown-report table {
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+
+#markdown-report th, #markdown-report td {
+    padding: 0.5em 1em;
+    border: 1px solid #cccccc;
+}
+

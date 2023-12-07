@@ -1,0 +1,10 @@
+﻿.col {
+    margin-bottom: 1em;
+    padding-right: 0 !important;
+}
+
+button.resource {
+    width: 150px;
+    height: 100px;
+    margin: 0 !important;
+}

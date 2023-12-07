@@ -1,0 +1,10 @@
+img.diagram {
+    width: 100%;
+    border: 1px dashed #999999;
+    padding: 1em;
+}
+
+.tooltip-inner {
+    max-width: 750px;
+    text-align: start;
+}
