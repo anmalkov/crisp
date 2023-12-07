@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  workflow_dispatch: 
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_VERSION: '7.0.x'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: Set version from tag
+      run: |
+        TAG_NAME=$(echo $GITHUB_REF | cut -d '/' -f 3)
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+        VERSION=${TAG_NAME#v}
+        echo "Updating project version to $VERSION"
+        sed -i "s/<AssemblyVersion>.*<\/AssemblyVersion>/<AssemblyVersion>$VERSION<\/AssemblyVersion>/g" Crisp.Core/Crisp.Core.csproj
+        sed -i "s/<FileVersion>.*<\/FileVersion>/<FileVersion>$VERSION<\/FileVersion>/g" Crisp.Core/Crisp.Core.csproj
+        sed -i "s/<AssemblyVersion>.*<\/AssemblyVersion>/<AssemblyVersion>$VERSION<\/AssemblyVersion>/g" Crisp.Ui/Crisp.Ui.csproj
+        sed -i "s/<FileVersion>.*<\/FileVersion>/<FileVersion>$VERSION<\/FileVersion>/g" Crisp.Ui/Crisp.Ui.csproj
+      working-directory: src
+
+    - name: Restore dependencies
+      run: dotnet restore
+      working-directory: src/Crisp.Core
+
+    - name: Build application
+      run: dotnet build --configuration Release --no-restore
+      working-directory: src/Crisp.Core
