@@ -66,7 +66,7 @@ public static class OpenXmlHelper
         using var document = WordprocessingDocument.Open(stream, isEditable: true);
         var body = document.MainDocumentPart.Document.Body;
         
-        var header = FindParagraph(body, "Threat Properties");
+        var header = FindParagraph(body, "Threats and Mitigations");
         if (header is null)
         {
             return;

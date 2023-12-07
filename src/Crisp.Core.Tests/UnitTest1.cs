@@ -72,7 +72,7 @@ public class UnitTest1
         {
             var body = document.MainDocumentPart.Document.Body;
             //var bookmark = body.Descendants<BookmarkStart>().First(b => b.Name == "tm_threat_properties");
-            var header = body.Descendants<Paragraph>().Where(p => p.Descendants<Run>().Any(r => r.Descendants<Text>().Any(t => t.Text.ToLower() == "threat properties"))).First();
+            var header = body.Descendants<Paragraph>().Where(p => p.Descendants<Run>().Any(r => r.Descendants<Text>().Any(t => t.Text.ToLower() == "threats and mitigations"))).First();
 
             // hr
             var p1 = new Paragraph(new ParagraphProperties(new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Color = "auto", Space = 1, Size = 6 })));

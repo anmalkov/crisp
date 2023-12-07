@@ -293,7 +293,7 @@ const AddThreatModel = () => {
                 ))}
             </FormGroup>
             <FormGroup>
-                <h5>Threat properties</h5>
+                <h5>Threats and Mitigations</h5>
                 {!category ? (
                     <p>There are no recommendations</p>
                 ) : (
