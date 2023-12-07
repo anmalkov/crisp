@@ -28,4 +28,5 @@ RUN dotnet publish "Crisp.Ui.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ../repos ./repos
 ENTRYPOINT ["dotnet", "Crisp.Ui.dll"]
