@@ -11,6 +11,7 @@ namespace Crisp.Ui.Handlers
         string Transport,
         string DataClassification,
         string Authentication,
+        string Authorization,
         string Notes
     );
     
@@ -76,6 +77,7 @@ namespace Crisp.Ui.Handlers
                 dataflowAttribute.Transport,
                 dataflowAttribute.DataClassification,
                 dataflowAttribute.Authentication,
+                dataflowAttribute.Authorization,
                 dataflowAttribute.Notes
             );
         }

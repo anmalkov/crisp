@@ -49,6 +49,7 @@ namespace Crisp.Ui.Handlers
                 dto.Transport,
                 dto.DataClassification,
                 dto.Authentication,
+                dto.Authorization,
                 dto.Notes
             );
         }

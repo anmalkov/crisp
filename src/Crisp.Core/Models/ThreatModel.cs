@@ -7,6 +7,7 @@ public record DataflowAttribute(
     string Transport,
     string DataClassification,
     string Authentication,
+    string Authorization,
     string Notes
 );
 

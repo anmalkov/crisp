@@ -96,6 +96,7 @@ const AddThreatModel = () => {
             transport: 'HTTPS/TLS 1.2',
             dataClassification: 'Confidential',
             authentication: 'Microsoft Entra ID',
+            authorization: 'RBAC',
             notes: ''
         };
         setDataflowAttributes([...dataflowAttributes, newAttribute]);
@@ -228,13 +229,16 @@ const AddThreatModel = () => {
                         <Col className="ps-0">
                             <Label>Transport Protocol</Label>
                         </Col>
-                        <Col className="ps-0">
+                        <Col>
                             <Label>Data Classification <FiInfo id="data-classification-info" /></Label>
                         </Col>
-                        <Col className="ps-0">
+                        <Col>
                             <Label>Authentication</Label>
                         </Col>
-                        <Col md={6} className="ps-0">
+                        <Col>
+                            <Label>Authorization</Label>
+                        </Col>
+                        <Col md={5}>
                             <Label>Notes</Label>
                         </Col>
                     </Row>
@@ -246,7 +250,7 @@ const AddThreatModel = () => {
                             <Col className="ps-0">
                                 <Input name="transport" value={a.transport} onChange={(e) => handleDataflowAttributeChange(e, index)} />
                             </Col>
-                            <Col className="ps-0">
+                            <Col>
                                 <Input type="select" name="dataClassification" value={a.dataClassification} onChange={(e) => handleDataflowAttributeChange(e, index)}>
                                     <option>Sensitive</option>
                                     <option>Confidential</option>
@@ -255,10 +259,13 @@ const AddThreatModel = () => {
                                     <option>Public</option>
                                 </Input>
                             </Col>
-                            <Col className="ps-0">
+                            <Col>
                                 <Input name="authentication" value={a.authentication} onChange={(e) => handleDataflowAttributeChange(e, index)} />
                             </Col>
-                            <Col md={6} className="ps-0">
+                            <Col>
+                                <Input name="authorization" value={a.authorization} onChange={(e) => handleDataflowAttributeChange(e, index)} />
+                            </Col>
+                            <Col md={5}>
                                 <Row>
                                     <Col md={11}>
                                         <Input name="notes" type="textarea" value={a.notes} onChange={(e) => handleDataflowAttributeChange(e, index)} />
