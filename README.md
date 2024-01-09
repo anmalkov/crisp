@@ -1,8 +1,6 @@
-# Crisp: Streamlined Security Planning Tool
+# Crisp
 
-## Overview
-
-Welcome to Crisp, the innovative web tool designed to revolutionize your approach to threat modeling. Crisp offers a user-friendly platform to effortlessly build, manage, and export comprehensive threat model reports named security plans. Tailored for engineering teams and project managers, this tool simplifies the complex process of threat modeling and security analysis.
+Crisp is the innovative web tool designed to revolutionize your approach to threat modeling. Crisp offers a user-friendly platform to effortlessly build, manage, and export comprehensive threat model reports named security plans. Tailored for engineering teams and project managers, this tool simplifies the complex process of threat modeling and security analysis.
 
 ## Features
 
