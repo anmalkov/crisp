@@ -23,6 +23,9 @@ jobs:
         token: ${{ secrets.CRISP_DATA_TOKEN }}
         path: src/repos/brief
 
+    - name: Remove git folder
+      run: rm -rf src/repos/brief/.git
+
     - name: test
       run: ls -la src/repos/brief
 
