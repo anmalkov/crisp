@@ -23,8 +23,10 @@ jobs:
         token: ${{ secrets.CRISP_DATA_TOKEN }}
         path: src/repos/brief
 
-    - name: test
-      run: ls -la src/repos/brief
+    - name: Remove unneeded files and folders
+      run: |
+        rm -rf src/repos/brief/.git
+        find src/repos/brief -type f -exec rm {} +
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
