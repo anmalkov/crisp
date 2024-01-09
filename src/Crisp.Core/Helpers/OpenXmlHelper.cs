@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
@@ -55,6 +56,7 @@ public static class OpenXmlHelper
                     new TableCell(new Paragraph(new Run(new Text(attribute.Transport)))),
                     new TableCell(new Paragraph(new Run(new Text(attribute.DataClassification)))),
                     new TableCell(new Paragraph(new Run(new Text(attribute.Authentication)))),
+                    new TableCell(new Paragraph(new Run(new Text(attribute.Authorization)))),
                     new TableCell(new Paragraph(new Run(new Text(attribute.Notes))))
                 })
             );
@@ -435,6 +437,7 @@ public static class OpenXmlHelper
     
     private static Paragraph? FindParagraph(Body body, string text)
     {
+        var p = body.Descendants<Paragraph>();
         return body.Descendants<Paragraph>().Where(p => p.Descendants<Run>().Any(r => r.Descendants<Text>().Any(t => t.Text.ToLower() == text.ToLower()))).FirstOrDefault();
     }
 

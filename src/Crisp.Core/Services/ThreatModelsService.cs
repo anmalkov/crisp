@@ -299,7 +299,7 @@ public class ThreatModelsService : IThreatModelsService
         var section = new StringBuilder();
         foreach (var a in threatModel.DataflowAttributes)
         {
-            section.AppendLine($"| {a.Number.Trim()} | {a.Transport.Trim()} | {a.DataClassification.Trim()} | {a.Authentication.Trim()} | {a.Notes.Trim()} |");
+            section.AppendLine($"| {a.Number.Trim()} | {a.Transport.Trim()} | {a.DataClassification.Trim()} | {a.Authentication.Trim()} | {a.Authorization.Trim()} | {a.Notes.Trim()} |");
         }
         return section.ToString().TrimEnd(Environment.NewLine.ToCharArray());
     }
