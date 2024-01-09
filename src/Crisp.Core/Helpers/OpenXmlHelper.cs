@@ -437,7 +437,6 @@ public static class OpenXmlHelper
     
     private static Paragraph? FindParagraph(Body body, string text)
     {
-        var p = body.Descendants<Paragraph>();
         return body.Descendants<Paragraph>().Where(p => p.Descendants<Run>().Any(r => r.Descendants<Text>().Any(t => t.Text.ToLower() == text.ToLower()))).FirstOrDefault();
     }
 
