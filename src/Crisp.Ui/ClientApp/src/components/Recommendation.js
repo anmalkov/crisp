@@ -1,9 +1,9 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useImperativeHandle, forwardRef } from 'react';
 import { ListGroupItem, Input } from 'reactstrap';
 import { FcFile } from "react-icons/fc";
 import ReactMarkdown from 'react-markdown'
 
-const Recommendation = ({ recommendation, level, isSelected, toggleSelectability }) => {
+const Recommendation = forwardRef(({ recommendation, level, isSelected, toggleSelectability }, ref) => {
 
     const [isOpen, setIsOpen] = useState(false);
 
@@ -26,6 +26,18 @@ const Recommendation = ({ recommendation, level, isSelected, toggleSelectability
         toggleSelectability(category);
     }
 
+    const open = () => {
+        setIsOpen(true);
+    }
+
+    const close = () => {
+        setIsOpen(false);
+    }
+
+    useImperativeHandle(ref, () => ({
+        open, close
+    }));
+
     return (
         <>
             <ListGroupItem style={{ paddingLeft: getPaddingLeft() + 'px' }} action tag="button" onClick={toggleIsOpen}>
@@ -40,6 +52,6 @@ const Recommendation = ({ recommendation, level, isSelected, toggleSelectability
             ) : null}
         </>
     )
-}
+});
 
 export default Recommendation;

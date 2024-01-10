@@ -1,14 +1,30 @@
-﻿import React, { useState } from 'react';
-import { ListGroupItem, Badge, Input } from 'reactstrap';
+﻿import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+import { ListGroupItem, Badge, Input, Button } from 'reactstrap';
 import Recommendation from './Recommendation';
+import { BsArrowsAngleContract, BsArrowsAngleExpand } from "react-icons/bs";
 
-const Category = ({ category, level, isSelected, toggleSelectability }) => {
+const Category = forwardRef(({ category, level, isSelected, toggleSelectability }, ref) => {
 
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [recommendationsExpanded, setRecommendationsExpanded] = useState(false);
+    const [recommendationsRefs, setRecommendationsRefs] = useState([]);
+    const [categoriesRefs, setCategoriesRefs] = useState([]);
 
     if (!level) {
         level = 0;
     }
+
+    useEffect(() => {
+        setRecommendationsRefs(recommendationsRefs => (
+            Array(category.recommendations.length).fill().map((_, i) => recommendationsRefs[i] || React.createRef())
+        ));
+    }, [category.recommendations.length]);
+
+    useEffect(() => {
+        setCategoriesRefs(categoriesRefs => (
+            Array(category.children.length).fill().map((_, i) => categoriesRefs[i] || React.createRef())
+        ));
+    }, [category.children.length]);
 
     const getPaddingLeft = () => {
         return (level * 30) + 15;
@@ -33,6 +49,35 @@ const Category = ({ category, level, isSelected, toggleSelectability }) => {
         toggleSelectability(category);
     }
 
+    const expandAllRecommendations = () => {
+        setRecommendationsExpanded(true);
+        recommendationsRefs.forEach(r => r.current?.open());
+        categoriesRefs.forEach(c => c.current?.expandAllRecommendations());
+    }
+
+    const collapseAllRecommendations = () => {
+        setRecommendationsExpanded(false);
+        recommendationsRefs.forEach(r => r.current?.close());
+        categoriesRefs.forEach(c => c.current?.collapseAllRecommendations());
+    }
+
+    useImperativeHandle(ref, () => ({
+        expandAllRecommendations, collapseAllRecommendations
+    }));
+
+    const expandAllHandler = (e) => {
+        console.log('expandAll');
+        expandAllRecommendations();
+        e.stopPropagation();
+    }
+
+    const collapseAllHandler = (e) => {
+        console.log('collapseAll');
+        collapseAllRecommendations();
+        e.stopPropagation();
+    }
+
+
     const categorySelected = isSelected(category.id);
     const recommendationsCount = calculateRecommendationsCount(category, false);
     const selectedRecommendationsCount = calculateRecommendationsCount(category, true);
@@ -43,6 +88,10 @@ const Category = ({ category, level, isSelected, toggleSelectability }) => {
                 <div>
                     <Input className="form-check-input me-3" type="checkbox" checked={categorySelected} onChange={() => toggleIsSelect(category)} />
                     <b>{category.name}</b>
+                    {!recommendationsExpanded
+                        ? <Button color="link" size="sm" onClick={expandAllHandler} className="ms-3"><BsArrowsAngleExpand /></Button>
+                        : <Button color="link" size="sm" onClick={collapseAllHandler} className="ms-3"><BsArrowsAngleContract /></Button>
+                    }
                 </div>
                 <Badge color={categorySelected ? 'primary' : 'secondary'}>
                     {categorySelected ? selectedRecommendationsCount : recommendationsCount}
@@ -50,16 +99,16 @@ const Category = ({ category, level, isSelected, toggleSelectability }) => {
             </ListGroupItem>
             {!isCollapsed ? (
                 <>
-                    {category.children.map(c => (
-                        <Category key={c.id} category={c} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
+                    {categoriesRefs.map((ref, i) => (
+                        <Category key={category.children[i].id} ref={ref} category={category.children[i]} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
                     ))}
-                    {category.recommendations.map(r => (
-                        <Recommendation key={r.id} recommendation={r} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
+                    {recommendationsRefs.map((ref, i) => (
+                        <Recommendation key={category.recommendations[i].id} ref={ref} recommendation={category.recommendations[i]} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
                     ))}
                 </>
             ) : null}
         </>
     )
-}
+});
 
 export default Category;
