@@ -1,7 +1,9 @@
 ﻿using Crisp.Core.Models;
 using Crisp.Core.Repositories;
+using DocumentFormat.OpenXml.Spreadsheet;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Crisp.Core.Services;
 
@@ -53,15 +55,61 @@ public class RecommendationsService : IRecommendationsService
     private Category MapBenchmarksToCategory(string resourceName, IEnumerable<SecurityBenchmark> benchmarks)
     {
         var categories = new List<Category>();
-        foreach (var categoryName in benchmarks.Select(b => b.Category).Distinct())
+        if (benchmarks.All(b => b.ControlId is null))
         {
-            var recommendations = benchmarks.Where(b => b.Category.Equals(categoryName)).Select(b => MapSecurityBenchmarkToRecommendation(resourceName, b)).ToArray();
-            categories.Add(new Category(
-                GenerateIdFor($"{resourceName}-{categoryName}"),
-                categoryName,
-                Description: null,
-                Children: Enumerable.Empty<Category>(),
-                recommendations));
+            // old benchmarks - v1.1, v2
+            foreach (var categoryName in benchmarks.Select(b => b.Category).Distinct())
+            {
+                var recommendations = benchmarks.Where(b => b.Category.Equals(categoryName)).Select(b => MapSecurityBenchmarkToRecommendation(resourceName, b)).ToArray();
+                categories.Add(new Category(
+                    GenerateIdFor($"{resourceName}-{categoryName}"),
+                    categoryName,
+                    Description: null,
+                    Children: Enumerable.Empty<Category>(),
+                    recommendations));
+            }
+        } else
+        {
+            // new benchmarks - v3
+            var categoriesOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Network Security", 1},
+                {"Identity Management", 2},
+                {"Privileged Access", 3},
+                {"Data Protection", 4},
+                {"Asset Management", 5},
+                {"Logging and Threat Detection", 6},
+                {"Incident Response", 7},
+                {"Posture and Vulnerability Management", 8},
+                {"Endpoint Security", 9},
+                {"Backup and Recovery", 10},
+                {"DevOps Security", 11},
+                {"Governance and Strategy", 12}
+            };
+
+            var sortedBenchmarksGroups = benchmarks.Where(b => categoriesOrder.ContainsKey(b.Category)).GroupBy(b => b.Category).OrderBy(g => categoriesOrder[g.Key]).ToList();
+
+            foreach (var group in sortedBenchmarksGroups)
+            {
+                var subCategories = new List<Category>();
+                foreach (var subGroup in group.GroupBy(b => b.ControlId).OrderBy(g => g.Key))
+                {
+                    var recommendations = subGroup.Select(b => MapSecurityBenchmarkToRecommendation($"{resourceName}-{group.Key}-{subGroup.Key}", b)).ToArray();
+                    subCategories.Add(new Category(
+                        GenerateIdFor($"{resourceName}-{group.Key}-{subGroup.Key}"),
+                        subGroup.First().ControlTitle ?? "",
+                        Description: null,
+                        Children: Enumerable.Empty<Category>(),
+                        recommendations));
+                }
+                categories.Add(new Category(
+                    GenerateIdFor($"{resourceName}-{group.Key}"),
+                    group.Key,
+                    Description: null,
+                    Children: subCategories,
+                    Recommendations: Enumerable.Empty<Recommendation>()));
+            }
+
         }
         return new Category(
             GenerateIdFor(resourceName),
@@ -73,11 +121,49 @@ public class RecommendationsService : IRecommendationsService
 
     private Recommendation MapSecurityBenchmarkToRecommendation(string resourceName, SecurityBenchmark benchmark)
     {
-        return new Recommendation(
-            GenerateIdFor($"{resourceName}-{benchmark.Title}"),
-            benchmark.Title,
-            benchmark.Description
-        );
+        if (benchmark.ControlTitle is null)
+        {
+            // old benchmarks - v1.1, v2
+            var description = benchmark.Description;
+            var matches = Regex.Matches(description, "[\\s]+https://[^\\s]+");
+            foreach (Match match in matches)
+            {
+                var url = match.Value.Trim();
+                description = description.Replace(match.Value, $" [{url}]({url})");
+            }
+            return new Recommendation(
+                GenerateIdFor($"{resourceName}-{benchmark.Title}"),
+                benchmark.Title,
+                description
+            );
+        } else
+        {
+            // new benchmarks - v3
+            var featureDefined = !string.Equals(benchmark.FeatureDescription, "No Related Feature", StringComparison.OrdinalIgnoreCase);
+            var description = "";
+            if (featureDefined)
+            {
+                description = $"{benchmark.FeatureDescription}{Environment.NewLine}{Environment.NewLine}**Configuration Guidance:**{Environment.NewLine}{Environment.NewLine}{benchmark.Description}";
+            } else
+            {
+                description = $"{benchmark.Description}";
+            }
+            if (!string.IsNullOrWhiteSpace(benchmark.FeatureReference) && featureDefined && !string.Equals(benchmark.FeatureReference, "None", StringComparison.OrdinalIgnoreCase))
+            {
+                var reference = benchmark.FeatureReference;
+                var match = Regex.Match(benchmark.FeatureReference, "https://[^\\s]+");
+                if (match.Success)
+                {
+                    reference = reference.Replace(match.Value, $"[{match.Value}]({match.Value})");
+                }
+                description += $"{Environment.NewLine}{Environment.NewLine}**Reference:**{Environment.NewLine}{Environment.NewLine}{reference}";
+            }
+            return new Recommendation(
+                GenerateIdFor($"{resourceName}-{benchmark.FeatureName}"),
+                benchmark.FeatureName!,
+                description
+            );
+        }
     }
 
     private static string GenerateIdFor(string text)
