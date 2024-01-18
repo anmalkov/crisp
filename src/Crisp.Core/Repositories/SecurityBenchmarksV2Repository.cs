@@ -1,12 +1,8 @@
 ﻿using Crisp.Core.Models;
 using ExcelDataReader;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Crisp.Core.Repositories;
 
@@ -62,11 +58,11 @@ public class SecurityBenchmarksV2Repository : ISecurityBenchmarksRepository
                     break;
                 }
                 benchmarks.Add(new SecurityBenchmark(
+                    reader.GetValue(2)?.ToString() ?? "",
                     reader.GetValue(1)?.ToString() ?? "",
                     title,
                     reader.GetValue(6)?.ToString() ?? "",
-                    reader.GetValue(2)?.ToString(),
-                    null, null, null, null, null, null,
+                    null, null, null, null, null,
                     reader.GetValue(7)?.ToString()
                 ));
             }

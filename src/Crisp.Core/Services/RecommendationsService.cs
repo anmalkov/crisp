@@ -1,6 +1,5 @@
 ﻿using Crisp.Core.Models;
 using Crisp.Core.Repositories;
-using DocumentFormat.OpenXml.Spreadsheet;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -55,7 +54,7 @@ public class RecommendationsService : IRecommendationsService
     private Category MapBenchmarksToCategory(string resourceName, IEnumerable<SecurityBenchmark> benchmarks)
     {
         var categories = new List<Category>();
-        if (benchmarks.All(b => b.ControlId is null))
+        if (benchmarks.All(b => string.IsNullOrEmpty(b.ControlTitle)))
         {
             // old benchmarks - v1.1, v2
             foreach (var categoryName in benchmarks.Select(b => b.Category).Distinct())
@@ -92,7 +91,7 @@ public class RecommendationsService : IRecommendationsService
             foreach (var group in sortedBenchmarksGroups)
             {
                 var subCategories = new List<Category>();
-                foreach (var subGroup in group.GroupBy(b => b.ControlId).OrderBy(g => g.Key))
+                foreach (var subGroup in group.GroupBy(b => b.Id).OrderBy(g => g.Key))
                 {
                     var recommendations = subGroup.Select(b => MapSecurityBenchmarkToRecommendation($"{resourceName}-{group.Key}-{subGroup.Key}", b)).ToArray();
                     subCategories.Add(new Category(
@@ -109,7 +108,6 @@ public class RecommendationsService : IRecommendationsService
                     Children: subCategories,
                     Recommendations: Enumerable.Empty<Recommendation>()));
             }
-
         }
         return new Category(
             GenerateIdFor(resourceName),
