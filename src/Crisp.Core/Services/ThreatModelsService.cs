@@ -5,7 +5,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Category = Crisp.Core.Models.Category;
 using Crisp.Core.Helpers;
-using DocumentFormat.OpenXml.Packaging;
 using System.Text.RegularExpressions;
 
 namespace Crisp.Core.Services;
@@ -17,6 +16,7 @@ public class ThreatModelsService : IThreatModelsService
     private const string GitHubThreatModelFolderName = "Threat Model";
     private const string GitHubMarkdownThreatModelTemplateFilePath = GitHubThreatModelFolderName + "/threat-model-template.md";
     private const string GitHubWordThreatModelTemplateFilePath = GitHubThreatModelFolderName + "/threat-model-template.docx";
+    private const string GitHubThreatMappingFileSuffix = ".map.csv";
 
     private const string CategoryCacheKey = "threatmodels.category";
     private const string MarkdownTemplateCacheKey = "threatmodels.template";
@@ -313,12 +313,14 @@ public class ThreatModelsService : IThreatModelsService
 
     private Category MapDirectoryToCategory(GitHubDirectory directory)
     {
+        var markdownTemplateFilename = Path.GetFileName(GitHubMarkdownThreatModelTemplateFilePath);
+        var wordTemplateFilename = Path.GetFileName(GitHubWordThreatModelTemplateFilePath);
         return new Category(
             GenerateIdFor(directory.Url),
             directory.Name,
             "",
             directory.Directories?.Select(d => MapDirectoryToCategory(d)).ToList(),
-            directory.Files?.Where(f => f.Name != "threat-model-template.md" && f.Name != "threat-model-template.docx").Select(f => MapFileToRecommendation(f)).ToList()
+            directory.Files?.Where(f => f.Name != markdownTemplateFilename && f.Name != wordTemplateFilename && f.Name.EndsWith(".md")).Select(f => MapFileToRecommendation(f)).ToList()
         );
     }
 
@@ -329,11 +331,20 @@ public class ThreatModelsService : IThreatModelsService
 
     private Recommendation MapFileToRecommendation(GitHubFile file)
     {
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.Name);
+        var threatMmappingFilePath = Path.Combine(Path.GetDirectoryName(file.Url)!, fileNameWithoutExtension + GitHubThreatMappingFileSuffix);
+        IEnumerable<string> benchmarkIds = null;
+        if (File.Exists(threatMmappingFilePath))
+        {
+            var mappingFileContent = File.ReadAllText(threatMmappingFilePath);
+            benchmarkIds = mappingFileContent.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(i => i.Trim()).ToArray();
+        }
+
         return new Recommendation(
             GenerateIdFor(file.Url),
-            System.IO.Path.GetFileNameWithoutExtension(file.Name),
-            file.Content
+            fileNameWithoutExtension,
+            file.Content ?? "",
+            benchmarkIds
         );
     }
-
 }

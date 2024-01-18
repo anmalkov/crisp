@@ -59,7 +59,8 @@ namespace Crisp.Ui.Handlers
             return new Recommendation(
                 dto.Id,
                 dto.Title,
-                dto.Description
+                dto.Description,
+                null
             );
         }
     }

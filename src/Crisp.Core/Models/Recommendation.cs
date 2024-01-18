@@ -3,5 +3,6 @@
 public record Recommendation(
     string Id,
     string Title,
-    string Description
+    string Description,
+    IEnumerable<string>? BenchmarkIds
 );
