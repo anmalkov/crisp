@@ -75,7 +75,8 @@ public class CategoriesService : ICategoriesService
         return new Recommendation(
             GenerateIdFor(file.Url),
             Path.GetFileNameWithoutExtension(file.Name),
-            file.Content
+            file.Content,
+            null
         );
     }
 }

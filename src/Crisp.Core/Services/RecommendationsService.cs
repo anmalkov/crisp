@@ -132,7 +132,8 @@ public class RecommendationsService : IRecommendationsService
             return new Recommendation(
                 GenerateIdFor($"{resourceName}-{benchmark.Title}"),
                 benchmark.Title,
-                description
+                description,
+                null
             );
         } else
         {
@@ -159,7 +160,8 @@ public class RecommendationsService : IRecommendationsService
             return new Recommendation(
                 GenerateIdFor($"{resourceName}-{benchmark.FeatureName}"),
                 benchmark.FeatureName!,
-                description
+                description,
+                null
             );
         }
     }
