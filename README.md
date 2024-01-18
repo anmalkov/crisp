@@ -26,10 +26,10 @@ Ensure Docker is installed on your system as it is required to run Crisp.
     docker pull anmalkov/crisp
     ```
 
-    To pull a specific version of the Crisp Docker image, replace `1.3.1` with the desired version number:
+    To pull a specific version of the Crisp Docker image, replace `1.4` with the desired version number:
 
     ```bash
-    docker pull anmalkov/crisp:1.3.1
+    docker pull anmalkov/crisp:1.4
     ```
 
     Available versions of the Crisp Docker image can be found on the [Crisp Docker Hub page](https://hub.docker.com/r/anmalkov/crisp/tags).
