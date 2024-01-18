@@ -72,11 +72,11 @@ public class SecurityBenchmarksV11Repository : ISecurityBenchmarksRepository
                     continue;
                 }
                 benchmarks.Add(new SecurityBenchmark(
+                    reader.GetValue(2)?.ToString() ?? "",
                     reader.GetValue(1)?.ToString() ?? "",
                     title,
                     description,
-                    reader.GetValue(2)?.ToString(),
-                    null, null, null, null, null, null,
+                    null, null, null, null, null,
                     responsibility
                 ));
             }

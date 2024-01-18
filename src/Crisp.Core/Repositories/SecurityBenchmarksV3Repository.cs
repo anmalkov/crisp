@@ -77,11 +77,10 @@ public class SecurityBenchmarksV3Repository : ISecurityBenchmarksRepository
                 }
 
                 benchmarks.Add(new SecurityBenchmark(
+                    reader.GetValue(1)?.ToString() ?? "",
                     reader.GetValue(0)?.ToString() ?? "",
                     title,
                     description,
-                    null,
-                    reader.GetValue(1)?.ToString(),
                     reader.GetValue(2)?.ToString(),
                     reader.GetValue(5)?.ToString(),
                     reader.GetValue(6)?.ToString(),
