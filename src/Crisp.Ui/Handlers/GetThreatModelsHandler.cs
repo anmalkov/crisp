@@ -21,9 +21,11 @@ namespace Crisp.Ui.Handlers
         string? Description,
         DateTime CreatedAt,
         DateTime? UpdatedAt,
+        bool AddResourcesRecommendations,
         IEnumerable<DataflowAttributeDto> DataflowAttributes,
         IEnumerable<RecommendationDto> Threats,
-        IEnumerable<KeyValuePair<string, string>>? Images
+        IEnumerable<KeyValuePair<string, string>>? Images,
+        IEnumerable<string>? Resources
     );
 
     public class GetThreatModelsHandler : IRequestHandler<GetThreatModelsRequest, IResult>
@@ -64,9 +66,11 @@ namespace Crisp.Ui.Handlers
                 p.Description,
                 p.CreatedAt,
                 p.UpdatedAt,
+                p.AddResourcesRecommendations,
                 p.DataflowAttributes.Select(MapDataflowAttributeToDto).ToArray(),
                 p.Threats.Select(MapRecommendationToDto).ToArray(),
-                p.Images
+                p.Images,
+                p.Resources
             )).ToArray();
         }
 
