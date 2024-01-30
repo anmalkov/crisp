@@ -41,9 +41,11 @@ namespace Crisp.Ui.Handlers
                 dto.Description,
                 oldThreatModel.CreatedAt,
                 DateTime.Now,
+                dto.AddResourcesRecommendations,
                 dto.DataflowAttributes.Select(MapDtoToDataflowAttribute).ToArray(),
                 dto.Threats.Select(MapDtoToRecommendation).ToArray(),
-                dto.Images?.ToDictionary(i => i.Key, i => i.Value)
+                dto.Images?.ToDictionary(i => i.Key, i => i.Value),
+                dto.Resources
             );
         }
 

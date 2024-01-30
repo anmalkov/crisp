@@ -6,9 +6,11 @@ namespace Crisp.Ui.Requests;
 public record CreateThreatModelDto(
     string ProjectName,
     string? Description,
+    bool AddResourcesRecommendations,
     IEnumerable<DataflowAttributeDto> DataflowAttributes,
     IEnumerable<RecommendationDto> Threats,
-    IEnumerable<KeyValuePair<string, string>>? Images
+    IEnumerable<KeyValuePair<string, string>>? Images,
+    IEnumerable<string>? Resources
 );
 
 public record struct CreateThreatModelRequest(

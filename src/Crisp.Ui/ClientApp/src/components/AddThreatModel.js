@@ -3,6 +3,7 @@ import { Spinner, ListGroup, Alert, Button, Badge, FormGroup, Label, Input, Row,
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { fetchThreatModelCategory, createThreatModel, fetchThreatModelFiles, updateThreatModel } from '../fetchers/threatmodels';
+import { fetchResources } from '../fetchers/resources';
 import { FiPlus, FiArrowLeft, FiCheck, FiInfo } from "react-icons/fi";
 import Category from './Category';
 import { useEffect } from 'react';
@@ -21,12 +22,16 @@ const AddThreatModel = () => {
     const { isError, isLoading, data, error } = useQuery(['threatmodel-category'], fetchThreatModelCategory, { staleTime: 24 * 60 * 60 * 1000 });
     const category = data;
 
+    const resourceNames = useQuery([`fetchResources`], fetchResources, { staleTime: 1 * 60 * 60 * 1000 });
+
+    const [selectedResources, setSelectedResources] = useState(oldThreatModel ? oldThreatModel.resources ? oldThreatModel.resources : [] : []);
     const [selectedList, setSelectedList] = useState([]);
     const [projectName, setProjectName] = useState(oldThreatModel ? oldThreatModel.projectName : '');
     const [dataflowAttributes, setDataflowAttributes] = useState(oldThreatModel ? oldThreatModel.dataflowAttributes : []);
     const [saveButtonDisabled, setSaveButtonDisabled] = useState(true);
     const [images, setImages] = useState([]);
     const [imagesDownloaded, setImagesDownloaded] = useState(false);
+    const [addResourcesRecommendations, setAddResourcesRecommendations] = useState(oldThreatModel ? oldThreatModel.addResourcesRecommendations : false);
 
     useEffect(() => {
         if (imagesDownloaded || !oldThreatModel || !oldThreatModel.images || imagesQuery.isLoading || !imagesQuery.data || imagesQuery.data.length === 0)  {
@@ -122,8 +127,10 @@ const AddThreatModel = () => {
         const threatModel = {
             projectName: projectName,
             dataflowAttributes: dataflowAttributes,
+            addResourcesRecommendations: addResourcesRecommendations,
             threats: selectedRecommendations,
-            images: images.length > 0 ? images.map(i => ({ key: i.type, value: i.fileName })) : null
+            images: images.length > 0 ? images.map(i => ({ key: i.type, value: i.fileName })) : null,
+            resources: selectedResources
         };
         try {
             if (!oldThreatModel) {
@@ -150,6 +157,18 @@ const AddThreatModel = () => {
             element.value = null;
         }
         setImages(newImages);
+    }
+
+    const changeResourcesHandler = (resourceName) => {
+        if (selectedResources.includes(resourceName)) {
+            setSelectedResources(selectedResources.filter(n => n !== resourceName));
+        } else {
+            setSelectedResources([...selectedResources, resourceName]);
+        }
+    };
+
+    const resourceButtonColor = (resourceName) => {
+        return selectedResources.includes(resourceName) ? 'primary' : 'secondary'
     }
 
     useEffect(() => {
@@ -207,6 +226,22 @@ const AddThreatModel = () => {
                         <CloseButton className="position-absolute top-0 end-0 border border-dark bg-white" onClick={() => onDiagramChange('arch')} />
                     </div>
                 ))}
+            </FormGroup>
+            <FormGroup>
+                <div className="mb-4">
+                    <h5>Resources</h5>
+                </div>
+                <Row>
+                    {resourceNames.isLoading ? (
+                        <div className="text-center">
+                            <Spinner>
+                                Loading...
+                            </Spinner>
+                        </div>
+                    ) : resourceNames.data.resources.map(r => (
+                        <Col key={r}><Button className="resource-small" onClick={() => changeResourcesHandler(r)} color={resourceButtonColor(r)}>{r}</Button></Col>
+                    ))}
+                </Row>
             </FormGroup>
             <FormGroup>
                 <h5>Data flow diagram</h5>
@@ -316,6 +351,11 @@ const AddThreatModel = () => {
                     </>
                 )}
             </FormGroup>
+            {selectedRecommendationsCount > 0 ? (
+                <FormGroup switch className="mb-3">
+                    <Input className="form-check-input me-3" type="switch" role="switch" checked={addResourcesRecommendations} onChange={() => setAddResourcesRecommendations(!addResourcesRecommendations)} /> Add resources recommendations to threats
+                </FormGroup>
+            ): null}
             <FormGroup className="border-top border-3 border-dark pt-3">
                 <Button color="success" onClick={saveThreatModelHandler} disabled={saveButtonDisabled}><FiCheck /> Save security plan</Button>
                 {createThreatModelMutation.isLoading &&
