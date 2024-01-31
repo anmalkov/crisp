@@ -6,6 +6,8 @@ using System.Text;
 using Category = Crisp.Core.Models.Category;
 using Crisp.Core.Helpers;
 using System.Text.RegularExpressions;
+using System.Dynamic;
+using System.Runtime.InteropServices;
 
 namespace Crisp.Core.Services;
 
@@ -30,15 +32,18 @@ public class ThreatModelsService : IThreatModelsService
     private readonly IThreatModelCategoriesRepository _threatModelCategoriesRepository;
     private readonly IMemoryCache _memoryCache;
     private readonly IReportsRepository _reportsRepository;
+    private readonly IRecommendationsService _recommendationsService;
 
     public ThreatModelsService(IGitHubRepository gitHubRepository, IThreatModelsRepository threatModelsRepository, 
-        IThreatModelCategoriesRepository threatModelCategoriesRepository, IMemoryCache memoryCache, IReportsRepository reportsRepository)
+        IThreatModelCategoriesRepository threatModelCategoriesRepository, IMemoryCache memoryCache, IReportsRepository reportsRepository,
+        IRecommendationsService recommendationsService)
     {
         _gitHubRepository = gitHubRepository;
         _threatModelsRepository = threatModelsRepository;
         _threatModelCategoriesRepository = threatModelCategoriesRepository;
         _memoryCache = memoryCache;
         _reportsRepository = reportsRepository;
+        _recommendationsService = recommendationsService;
     }
 
     
@@ -169,10 +174,18 @@ public class ThreatModelsService : IThreatModelsService
         }
         
         mdReport = mdReport.Replace(ProjectNamePlaceholder, threatModel.ProjectName);
-        var dataflowAttributeSection = GenerateDataflowAttributeSection(threatModel);
+
+        var dataflowAttributeSection = MarkdownReportHelper.GenerateDataflowAttributeSection(threatModel);
         mdReport = mdReport.Replace(DataflowAttributesPlaceholder, dataflowAttributeSection);
-        var threatModelPropertiesSection = GenerateThreatModelPropertiesSection(threatModel);
+
+        IDictionary<string, IEnumerable<SecurityBenchmark>>? benchmarks = threatModel.AddResourcesRecommendations && threatModel.Resources is not null
+            ? (await Task.WhenAll(
+                threatModel.Resources.Select(async r => new KeyValuePair<string, IEnumerable<SecurityBenchmark>>(r, await _recommendationsService.GetBenchmarksAsync(r)))
+              )).ToDictionary(pair => pair.Key, pair => pair.Value)
+            : null;
+        var threatModelPropertiesSection = MarkdownReportHelper.GenerateThreatModelPropertiesSection(threatModel, benchmarks);
         mdReport = mdReport.Replace(ThreatPropertiesPlaceholder, threatModelPropertiesSection);
+
         if (threatModel.Images is not null)
         {
             mdReport = RemoveHeadersForUnusedImages(mdReport, threatModel.Images);
@@ -258,7 +271,14 @@ public class ThreatModelsService : IThreatModelsService
 
         await OpenXmlHelper.ReplaceAsync(stream, ProjectNamePlaceholder, threatModel.ProjectName);
         OpenXmlHelper.AddDataflowAttributes(stream, threatModel.DataflowAttributes);
-        OpenXmlHelper.AddThreats(stream, threatModel.Threats);
+
+        IDictionary<string, IEnumerable<SecurityBenchmark>>? benchmarks = threatModel.AddResourcesRecommendations && threatModel.Resources is not null
+            ? (await Task.WhenAll(
+                threatModel.Resources.Select(async r => new KeyValuePair<string, IEnumerable<SecurityBenchmark>>(r, await _recommendationsService.GetBenchmarksAsync(r)))
+              )).ToDictionary(pair => pair.Key, pair => pair.Value)
+            : null;
+        OpenXmlHelper.AddThreats(stream, threatModel.Threats, benchmarks);
+
         if (threatModel.Images is not null)
         {
             OpenXmlHelper.RemoveParagraphForUnusedImages(stream, threatModel.Images);
@@ -274,34 +294,6 @@ public class ThreatModelsService : IThreatModelsService
         }
         
         return stream.ToArray();
-    }
-
-    private static string GenerateThreatModelPropertiesSection(ThreatModel threatModel)
-    {
-        var section = new StringBuilder();
-        var index = 1;
-        foreach (var threat in threatModel.Threats)
-        {
-            if (index > 1)
-            {
-                section.AppendLine();
-            }
-            section.AppendLine("---");
-            section.AppendLine($"**Threat #:** {index}  ");
-            section.AppendLine(threat.Description.Trim());
-            index++;
-        }
-        return section.ToString().TrimEnd(Environment.NewLine.ToCharArray());
-    }
-
-    private static string GenerateDataflowAttributeSection(ThreatModel threatModel)
-    {
-        var section = new StringBuilder();
-        foreach (var a in threatModel.DataflowAttributes)
-        {
-            section.AppendLine($"| {a.Number.Trim()} | {a.Transport.Trim()} | {a.DataClassification.Trim()} | {a.Authentication.Trim()} | {a.Authorization.Trim()} | {a.Notes.Trim()} |");
-        }
-        return section.ToString().TrimEnd(Environment.NewLine.ToCharArray());
     }
 
     private async Task<Category> GetRecommendationsFromGitHubAsync()

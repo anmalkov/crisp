@@ -25,7 +25,7 @@ const Recommendation = forwardRef(({ recommendation, level, isSelected, toggleSe
     const toggleIsSelect = (category) => {
         toggleSelectability(category);
     }
-
+    
     const open = () => {
         setIsOpen(true);
     }

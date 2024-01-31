@@ -9,7 +9,8 @@ namespace Crisp.Ui.Handlers
     public record RecommendationDto(
         string Id,
         string Title,
-        string Description
+        string Description,
+        IEnumerable<string>? BenchmarkIds
     );
 
     public record CategoryDto(
@@ -62,7 +63,8 @@ namespace Crisp.Ui.Handlers
             return new RecommendationDto(
                 recommendation.Id,
                 recommendation.Title,
-                recommendation.Description
+                recommendation.Description,
+                recommendation.BenchmarkIds
             );
         }
     }

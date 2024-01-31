@@ -63,7 +63,8 @@ public static class OpenXmlHelper
         }
     }
 
-    public static void AddThreats(Stream stream, IEnumerable<Recommendation> threats)
+    public static void AddThreats(Stream stream, IEnumerable<Recommendation> threats,
+        IDictionary<string, IEnumerable<SecurityBenchmark>>? benchmarks)
     {
         using var document = WordprocessingDocument.Open(stream, isEditable: true);
         var body = document.MainDocumentPart.Document.Body;
@@ -88,7 +89,13 @@ public static class OpenXmlHelper
                     new Run(new Text($" {threatIndex}") { Space = SpaceProcessingModeValues.Preserve })
                 )
             };
-            paragraphs.AddRange(GetParagraphsFromMarkdown(threat.Description));
+
+            var description = threat.Description + 
+                (benchmarks is not null
+                    ? MarkdownReportHelper.GenerateResourcesRecommendationsForThreat(threat, benchmarks).Replace("\n", Environment.NewLine)
+                    : "");
+            paragraphs.AddRange(GetParagraphsFromMarkdown(description));
+
             foreach (var paragraph in paragraphs.ToArray().Reverse())
             {
                 var hyperlinks = paragraph.Descendants<Hyperlink>();

@@ -109,7 +109,7 @@ public class UnitTest1
         var stream = new MemoryStream();
         stream.Write(wordTemplate, 0, wordTemplate.Length);
 
-        OpenXmlHelper.AddThreats(stream, recommendations);
+        OpenXmlHelper.AddThreats(stream, recommendations, null);
 
         File.WriteAllBytes("result2.docx", stream.ToArray());
     }
