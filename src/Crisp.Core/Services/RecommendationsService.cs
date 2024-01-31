@@ -44,6 +44,15 @@ public class RecommendationsService : IRecommendationsService
             Recommendations: Enumerable.Empty<Recommendation>());
     }
 
+    public async Task<IEnumerable<SecurityBenchmark>?> GetBenchmarksAsync(string resourceName)
+    {
+        var repositoryDirectoryPath = await gitHubRepository.CloneAsync(GitHubAccountName, GitHubRepositoryName);
+
+        var benchmarks = await securityBenchmarksRepository.GetSecurityBenchmarksForResourceAsync(resourceName, repositoryDirectoryPath);
+
+        return benchmarks;
+    }
+
     public async Task<IEnumerable<string>> GetResourcesAsync()
     {
         var repositoryDirectoryPath = await gitHubRepository.CloneAsync(GitHubAccountName, GitHubRepositoryName);

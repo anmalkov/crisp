@@ -67,7 +67,7 @@ namespace Crisp.Ui.Handlers
                 dto.Id,
                 dto.Title,
                 dto.Description,
-                null
+                dto.BenchmarkIds
             );
         }
     }

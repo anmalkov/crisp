@@ -48,7 +48,8 @@ namespace Crisp.Ui.Handlers
             return new RecommendationDto(
                 recommendation.Id,
                 recommendation.Title,
-                recommendation.Description
+                recommendation.Description,
+                recommendation.BenchmarkIds
             );
         }
     }
