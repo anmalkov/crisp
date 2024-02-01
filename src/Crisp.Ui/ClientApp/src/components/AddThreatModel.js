@@ -227,22 +227,29 @@ const AddThreatModel = () => {
                     </div>
                 ))}
             </FormGroup>
-            <FormGroup>
-                <div className="mb-4">
-                    <h5>Resources</h5>
-                </div>
-                <Row>
-                    {resourceNames.isLoading ? (
-                        <div className="text-center">
-                            <Spinner>
-                                Loading...
-                            </Spinner>
-                        </div>
-                    ) : resourceNames.data.resources.map(r => (
-                        <Col key={r}><Button className="resource-small" onClick={() => changeResourcesHandler(r)} color={resourceButtonColor(r)}>{r}</Button></Col>
-                    ))}
-                </Row>
-            </FormGroup>
+            {selectedRecommendationsCount > 0 ? (
+                <FormGroup switch className="mb-3">
+                    <Input className="form-check-input me-3" type="switch" role="switch" checked={addResourcesRecommendations} onChange={() => setAddResourcesRecommendations(!addResourcesRecommendations)} /> Add resources recommendations to threats (preview)
+                </FormGroup>
+            ) : null}
+            {addResourcesRecommendations ? (
+                <FormGroup>
+                    <div className="mb-4">
+                        <h5>Resources</h5>
+                    </div>
+                    <Row>
+                        {resourceNames.isLoading ? (
+                            <div className="text-center">
+                                <Spinner>
+                                    Loading...
+                                </Spinner>
+                            </div>
+                        ) : resourceNames.data.resources.map(r => (
+                            <Col key={r}><Button className="resource-small" onClick={() => changeResourcesHandler(r)} color={resourceButtonColor(r)}>{r}</Button></Col>
+                        ))}
+                    </Row>
+                </FormGroup>
+            ) : null}
             <FormGroup>
                 <h5>Data flow diagram</h5>
                 <input id="image-flow" className="form-control mb-3" type="file" accept="image/*" onChange={(e) => onDiagramChange('flow', e)} />
@@ -351,11 +358,6 @@ const AddThreatModel = () => {
                     </>
                 )}
             </FormGroup>
-            {selectedRecommendationsCount > 0 ? (
-                <FormGroup switch className="mb-3">
-                    <Input className="form-check-input me-3" type="switch" role="switch" checked={addResourcesRecommendations} onChange={() => setAddResourcesRecommendations(!addResourcesRecommendations)} /> Add resources recommendations to threats
-                </FormGroup>
-            ): null}
             <FormGroup className="border-top border-3 border-dark pt-3">
                 <Button color="success" onClick={saveThreatModelHandler} disabled={saveButtonDisabled}><FiCheck /> Save security plan</Button>
                 {createThreatModelMutation.isLoading &&
