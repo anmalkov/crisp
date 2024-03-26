@@ -49,7 +49,6 @@ public class RecommendationsService : IRecommendationsService
         var repositoryDirectoryPath = await gitHubRepository.CloneAsync(GitHubAccountName, GitHubRepositoryName);
 
         var benchmarks = await securityBenchmarksRepository.GetSecurityBenchmarksForResourceAsync(resourceName, repositoryDirectoryPath);
-
         return benchmarks;
     }
 
@@ -57,6 +56,12 @@ public class RecommendationsService : IRecommendationsService
     {
         var repositoryDirectoryPath = await gitHubRepository.CloneAsync(GitHubAccountName, GitHubRepositoryName);
         return await securityBenchmarksRepository.GetAllResourceNamesAsync(repositoryDirectoryPath);
+    }
+
+    public async Task<Category> GetBenchmarkControlsAsync()
+    {
+        var repositoryDirectoryPath = await gitHubRepository.CloneAsync(GitHubAccountName, GitHubRepositoryName);
+        return MapBenchmarkControlsToCategory(await securityBenchmarksRepository.GetSecurityBenchmarkControlsAsync(repositoryDirectoryPath));
     }
 
 
@@ -126,6 +131,45 @@ public class RecommendationsService : IRecommendationsService
             Recommendations: Enumerable.Empty<Recommendation>());
     }
 
+    private Category MapBenchmarkControlsToCategory(IEnumerable<SecurityBenchmarkControl> controls)
+    {
+        var domainsOrder = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+        {
+            {"Network Security", 1},
+            {"Identity Management", 2},
+            {"Privileged Access", 3},
+            {"Data Protection", 4},
+            {"Asset Management", 5},
+            {"Logging and Threat Detection", 6},
+            {"Incident Response", 7},
+            {"Posture and Vulnerability Management", 8},
+            {"Endpoint Security", 9},
+            {"Backup and Recovery", 10},
+            {"DevOps Security", 11},
+            {"Governance and Strategy", 12}
+        };
+
+        var sortedControlsGroups = controls.Where(b => domainsOrder.ContainsKey(b.Domain)).GroupBy(b => b.Domain).OrderBy(g => domainsOrder[g.Key]).ToList();
+        var categories = new List<Category>();
+        foreach (var group in sortedControlsGroups)
+        {
+            var recommendations = group.Select(MapSecurityBenchmarkControlToRecommendation).ToArray();
+            categories.Add(new Category(
+                GenerateIdFor(group.Key),
+                group.Key,
+                Description: null,
+                Children: Enumerable.Empty<Category>(),
+                recommendations));
+        }
+
+        return new Category(
+            GenerateIdFor("Cloud Security Benchmark"),
+            "Cloud Security Benchmark",
+            Description: null,
+            categories,
+            Recommendations: Enumerable.Empty<Recommendation>());
+    }
+
     private Recommendation MapSecurityBenchmarkToRecommendation(string resourceName, SecurityBenchmark benchmark)
     {
         if (benchmark.ControlTitle is null)
@@ -173,6 +217,39 @@ public class RecommendationsService : IRecommendationsService
                 null
             );
         }
+    }
+
+    private Recommendation MapSecurityBenchmarkControlToRecommendation(SecurityBenchmarkControl benchmarkControl)
+    {
+        var description = "";
+        if (benchmarkControl.Azure is not null)
+        {
+            if (benchmarkControl.Description is not null && benchmarkControl.Description.ToLower().Trim() != "n/a")
+            {
+                description = $"{benchmarkControl.Description}{Environment.NewLine}{Environment.NewLine}**Azure Guidance:**{Environment.NewLine}{Environment.NewLine}";
+            }
+            description += benchmarkControl.Azure;
+        }
+        else
+        {
+            description = $"{benchmarkControl.Description}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(description))
+        {
+            var match = Regex.Matches(description, "https://[^\\s]+");
+            foreach (Match m in match)
+            {
+                var url = m.Value.Trim();
+                description = description.Replace(m.Value, $" [{url}]({url})");
+            }
+        }
+        return new Recommendation(
+            benchmarkControl.Id,
+            $"{benchmarkControl.Id}: {benchmarkControl.Title!}",
+            description,
+            null
+        );
     }
 
     private static string GenerateIdFor(string text)

@@ -1,0 +1,9 @@
+﻿.selected-recommendation {
+    color: #0366d6;
+}
+
+@media (prefers-color-scheme: dark) {
+    .selected-recommendation {
+        color: white;
+    }
+}

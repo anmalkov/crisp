@@ -6,4 +6,5 @@ public interface ISecurityBenchmarksRepository
 {
     Task<IEnumerable<string>> GetAllResourceNamesAsync(string rootDirectoryPath);
     Task<IEnumerable<SecurityBenchmark>> GetSecurityBenchmarksForResourceAsync(string resourceName, string rootDirectoryPath);
+    Task<IEnumerable<SecurityBenchmarkControl>> GetSecurityBenchmarkControlsAsync(string rootDirectoryPath);
 }

@@ -11,6 +11,7 @@ public class SecurityBenchmarksV3Repository : ISecurityBenchmarksRepository
     private const string SecurityBaselineVersion = "3";
     private const string SecurityBaselineFileSuffix = $"-azure-security-benchmark-v{SecurityBaselineVersion}-latest-security-baseline.xlsx";
 
+
     public Task<IEnumerable<string>> GetAllResourceNamesAsync(string rootDirectoryPath)
     {
         return Task.Run<IEnumerable<string>>(() =>
@@ -37,6 +38,18 @@ public class SecurityBenchmarksV3Repository : ISecurityBenchmarksRepository
         return await GetAllSecurityBenchmarksAsync(fileFullName);
     }
 
+    public async Task<IEnumerable<SecurityBenchmarkControl>> GetSecurityBenchmarkControlsAsync(string rootDirectoryPath)
+    {
+        var benchmarkControlsFileName = Path.Combine(rootDirectoryPath, "Microsoft Cloud Security Benchmark", "Microsoft_cloud_security_benchmark_v1.xlsx");
+        if (!File.Exists(benchmarkControlsFileName))
+        {
+            return Enumerable.Empty<SecurityBenchmarkControl>();
+        }
+
+        var benchmarkControls = await GetAllSecurityBenchmarkControlsAsync(benchmarkControlsFileName);
+        return benchmarkControls;
+    }
+
 
     private static Task<IEnumerable<SecurityBenchmark>> GetAllSecurityBenchmarksAsync(string fileFullName)
     {
@@ -47,10 +60,8 @@ public class SecurityBenchmarksV3Repository : ISecurityBenchmarksRepository
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             using var stream = File.Open(fileFullName, FileMode.Open, FileAccess.Read);
             using var reader = ExcelReaderFactory.CreateReader(stream);
-            // Skip the first sheet and move to the second one
-            reader.NextResult();
-            // Skip the header row
-            reader.Read();
+            reader.NextResult();  // Skip the first sheet and move to the second one
+            reader.Read();  // Skip the header row
             while (reader.Read())
             {
                 var title = reader.GetValue(2)?.ToString();
@@ -88,6 +99,49 @@ public class SecurityBenchmarksV3Repository : ISecurityBenchmarksRepository
             return benchmarks;
         });
     }
+
+    private static Task<IEnumerable<SecurityBenchmarkControl>> GetAllSecurityBenchmarkControlsAsync(string fileFullName)
+    {
+        return Task.Run<IEnumerable<SecurityBenchmarkControl>>(() => {
+            var controls = new List<SecurityBenchmarkControl>();
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);  // Register the code pages to support ExcelDataReader on non-Windows systems
+            using var stream = File.Open(fileFullName, FileMode.Open, FileAccess.Read);
+            using var reader = ExcelReaderFactory.CreateReader(stream);
+            reader.NextResult();  // Skip the first sheet and move to the second one
+            do {
+                reader.Read();  // Skip the header row
+                while (reader.Read())
+                {
+                    var fieldCount = reader.FieldCount;
+                    var azureGuidance = reader.GetValue(8)?.ToString();
+                    var azureImplementation = reader.GetValue(9)?.ToString();
+                    var awsGuidance = (string)null;// reader.GetValue(10)?.ToString();
+                    var awsImplementation = (string)null;// reader.GetValue(11)?.ToString();
+
+                    var azure = azureGuidance is null && azureImplementation is null
+                        ? null
+                        : $"{azureGuidance}{((azureGuidance is not null && azureImplementation is not null) ? Environment.NewLine + Environment.NewLine : "")}{azureImplementation}";
+
+                    var aws = awsGuidance is null && awsImplementation is null
+                        ? null
+                        : $"{awsGuidance}{((awsGuidance is not null && awsImplementation is not null) ? Environment.NewLine + Environment.NewLine : "")}{awsImplementation}";
+
+                    controls.Add(new SecurityBenchmarkControl(
+                        reader.GetValue(0)?.ToString() ?? "",
+                        reader.GetValue(1)?.ToString() ?? "",
+                        reader.GetValue(6)?.ToString() ?? "",
+                        reader.GetValue(7)?.ToString(),
+                        azure,
+                        aws,
+                        null
+                    ));
+                }
+            }
+            while (reader.NextResult());
+            return controls;
+        });
+    }
+
 
     private static string GetFileFullNameForResource(string rootDirectoryPath, string resourceName)
     {

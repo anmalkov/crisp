@@ -1,82 +1,40 @@
-﻿import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { ListGroupItem, Badge, Input, Button } from 'reactstrap';
 import Recommendation from './Recommendation';
 import { BsArrowsAngleContract, BsArrowsAngleExpand } from "react-icons/bs";
 
-const Category = forwardRef(({ category, level, isSelected, toggleSelectability }, ref) => {
-
+const Category = ({ category, level = 0, isSelected, toggleSelectability, recommendationsExpanded = false }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
-    const [recommendationsExpanded, setRecommendationsExpanded] = useState(false);
-    const [recommendationsRefs, setRecommendationsRefs] = useState([]);
-    const [categoriesRefs, setCategoriesRefs] = useState([]);
-
-    if (!level) {
-        level = 0;
-    }
+    const [recommendationsExpandedLocal, setRecommendationsExpandedLocal] = useState(recommendationsExpanded);
 
     useEffect(() => {
-        setRecommendationsRefs(recommendationsRefs => (
-            Array(category.recommendations.length).fill().map((_, i) => recommendationsRefs[i] || React.createRef())
-        ));
-    }, [category.recommendations.length]);
+        setRecommendationsExpandedLocal(recommendationsExpanded);
+    }, [recommendationsExpanded]);
 
-    useEffect(() => {
-        setCategoriesRefs(categoriesRefs => (
-            Array(category.children.length).fill().map((_, i) => categoriesRefs[i] || React.createRef())
-        ));
-    }, [category.children.length]);
+    const paddingLeft = useMemo(() => (level * 30) + 15, [level]);
 
-    const getPaddingLeft = () => {
-        return (level * 30) + 15;
-    }
-
-    const calculateRecommendationsCount = (category, onlySelected) => {
+    const calculateRecommendationsCount = useCallback((cat, onlySelected) => {
         let count = onlySelected
-            ? category.recommendations.filter(r => isSelected(r.id)).length
-            : category.recommendations.length;
-        category.children.forEach(c => count += calculateRecommendationsCount(c, onlySelected));
+            ? cat.recommendations.filter(r => isSelected(r.id)).length
+            : cat.recommendations.length;
+        cat.children?.forEach(c => count += calculateRecommendationsCount(c, onlySelected));
         return count;
-    }
+    }, [isSelected]);
 
-    const toggleIsCollapsed = (e) => {
-        if (e.target.tagName === "INPUT") {
-            return;
+    const toggleIsCollapsed = useCallback((e) => {
+        if (e.target.tagName !== "INPUT") {
+            setIsCollapsed(!isCollapsed);
         }
-        setIsCollapsed(!isCollapsed);
-    }
+    }, [isCollapsed]);
 
-    const toggleIsSelect = (category) => {
+    const toggleIsSelect = useCallback(() => {
         toggleSelectability(category);
-    }
+    }, [category, toggleSelectability]);
 
-    const expandAllRecommendations = () => {
-        setRecommendationsExpanded(true);
-        recommendationsRefs.forEach(r => r.current?.open());
-        categoriesRefs.forEach(c => c.current?.expandAllRecommendations());
-    }
-
-    const collapseAllRecommendations = () => {
-        setRecommendationsExpanded(false);
-        recommendationsRefs.forEach(r => r.current?.close());
-        categoriesRefs.forEach(c => c.current?.collapseAllRecommendations());
-    }
-
-    useImperativeHandle(ref, () => ({
-        expandAllRecommendations, collapseAllRecommendations
-    }));
-
-    const expandAllHandler = (e) => {
-        console.log('expandAll');
-        expandAllRecommendations();
+    const toggleRecommendationsExpanded = useCallback((e) => {
+        setRecommendationsExpandedLocal(exp => !exp);
         e.stopPropagation();
-    }
-
-    const collapseAllHandler = (e) => {
-        console.log('collapseAll');
-        collapseAllRecommendations();
-        e.stopPropagation();
-    }
-
+    }, []);
 
     const categorySelected = isSelected(category.id);
     const recommendationsCount = calculateRecommendationsCount(category, false);
@@ -84,31 +42,30 @@ const Category = forwardRef(({ category, level, isSelected, toggleSelectability 
 
     return (
         <>
-            <ListGroupItem className="d-flex justify-content-between align-items-center" style={{ paddingLeft: getPaddingLeft() + 'px' }} action tag="button" onClick={toggleIsCollapsed}>
+            <ListGroupItem className="d-flex justify-content-between align-items-center" style={{ paddingLeft: `${paddingLeft}px` }} action tag="div" onClick={toggleIsCollapsed}>
                 <div>
-                    <Input className="form-check-input me-3" type="checkbox" checked={categorySelected} onChange={() => toggleIsSelect(category)} />
+                    <Input className="form-check-input me-3" type="checkbox" checked={categorySelected} onChange={toggleIsSelect} />
                     <b>{category.name}</b>
-                    {!recommendationsExpanded
-                        ? <Button color="link" size="sm" onClick={expandAllHandler} className="ms-3"><BsArrowsAngleExpand /></Button>
-                        : <Button color="link" size="sm" onClick={collapseAllHandler} className="ms-3"><BsArrowsAngleContract /></Button>
-                    }
+                    <Button color="link" size="sm" onClick={toggleRecommendationsExpanded} className="ms-3">
+                        {recommendationsExpandedLocal ? <BsArrowsAngleContract /> : <BsArrowsAngleExpand />}
+                    </Button>
                 </div>
                 <Badge color={categorySelected ? 'primary' : 'secondary'}>
                     {categorySelected ? selectedRecommendationsCount : recommendationsCount}
                 </Badge>
             </ListGroupItem>
-            {!isCollapsed ? (
+            {!isCollapsed && (
                 <>
-                    {categoriesRefs.map((ref, i) => (
-                        <Category key={category.children[i].id} ref={ref} category={category.children[i]} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
+                    {category.children?.map(child => (
+                        <Category key={child.id} category={child} level={level + 1} recommendationsExpanded={recommendationsExpandedLocal} isSelected={isSelected} toggleSelectability={toggleSelectability} />
                     ))}
-                    {recommendationsRefs.map((ref, i) => (
-                        <Recommendation key={category.recommendations[i].id} ref={ref} recommendation={category.recommendations[i]} level={level + 1} isSelected={isSelected} toggleSelectability={toggleSelectability} />
+                    {category.recommendations.map(recommendation => (
+                        <Recommendation key={recommendation.id} recommendation={recommendation} level={level + 1} isOpen={recommendationsExpandedLocal} isSelected={isSelected} toggleSelectability={toggleSelectability} />
                     ))}
                 </>
-            ) : null}
+            )}
         </>
-    )
-});
+    );
+};
 
 export default Category;

@@ -38,6 +38,11 @@ public class SecurityBenchmarksV11Repository : ISecurityBenchmarksRepository
         return await GetAllSecurityBenchmarksAsync(fileFullName);
     }
 
+    public Task<IEnumerable<SecurityBenchmarkControl>> GetSecurityBenchmarkControlsAsync(string rootDirectoryPath)
+    {
+        throw new NotImplementedException();
+    }
+
 
     private static Task<IEnumerable<SecurityBenchmark>> GetAllSecurityBenchmarksAsync(string fileFullName)
     {

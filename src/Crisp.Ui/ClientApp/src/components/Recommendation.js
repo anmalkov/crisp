@@ -1,57 +1,41 @@
-﻿import React, { useState, useImperativeHandle, forwardRef } from 'react';
+﻿import React, { useState, useCallback, useEffect } from 'react';
 import { ListGroupItem, Input } from 'reactstrap';
 import { FcFile } from "react-icons/fc";
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from 'react-markdown';
 
-const Recommendation = forwardRef(({ recommendation, level, isSelected, toggleSelectability }, ref) => {
+const Recommendation = ({ recommendation, level = 0, isSelected, toggleSelectability, isOpen = false }) => {
+    const [isOpenLocal, setIsOpenLocal] = useState(isOpen);
 
-    const [isOpen, setIsOpen] = useState(false);
+    useEffect(() => {
+        setIsOpenLocal(isOpen);
+    }, [isOpen]);
 
-    if (!level) {
-        level = 0;
-    }
-
-    const getPaddingLeft = () => {
-        return level * 30;
-    }
-
-    const toggleIsOpen = (e) => {
-        if (e.target.tagName === "INPUT") {
-            return;
+    const toggleIsOpen = useCallback((e) => {
+        if (e.target.tagName !== "INPUT") {
+            setIsOpenLocal(!isOpenLocal);
         }
-        setIsOpen(!isOpen);
-    }
+    }, [isOpenLocal]);
 
-    const toggleIsSelect = (category) => {
-        toggleSelectability(category);
-    }
-    
-    const open = () => {
-        setIsOpen(true);
-    }
+    const toggleIsSelect = useCallback(() => {
+        toggleSelectability(recommendation);
+    }, [recommendation, toggleSelectability]);
 
-    const close = () => {
-        setIsOpen(false);
-    }
-
-    useImperativeHandle(ref, () => ({
-        open, close
-    }));
+    const paddingLeft = level * 30;
 
     return (
         <>
-            <ListGroupItem style={{ paddingLeft: getPaddingLeft() + 'px' }} action tag="button" onClick={toggleIsOpen}>
-                <Input className="form-check-input me-2" type="checkbox" checked={isSelected(recommendation.id)} onChange={() => toggleIsSelect(recommendation)} /> <FcFile /> {recommendation.title}
+            <ListGroupItem style={{ paddingLeft: `${paddingLeft}px` }} action tag="button" onClick={toggleIsOpen}>
+                <Input className="form-check-input me-2" type="checkbox" checked={isSelected(recommendation.id)} onChange={toggleIsSelect} /> <FcFile /> {recommendation.title}
             </ListGroupItem>
-            {isOpen ? (
-                <ListGroupItem style={{ paddingLeft: getPaddingLeft() + 'px' }} action tag="button" onClick={toggleIsOpen}>
+            {isOpenLocal && (
+                <ListGroupItem style={{ paddingLeft: `${paddingLeft}px` }} action tag="button" onClick={toggleIsOpen}>
                     <div className="ps-5">
                         <ReactMarkdown>{recommendation.description}</ReactMarkdown>
                     </div>
                 </ListGroupItem>
-            ) : null}
+            )}
         </>
-    )
-});
+    );
+};
 
 export default Recommendation;

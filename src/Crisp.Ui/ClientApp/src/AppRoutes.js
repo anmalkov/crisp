@@ -4,6 +4,7 @@ import AddThreatModel from "./components/AddThreatModel";
 import ThreatModelReport from "./components/ThreatModelReport";
 import Recommendations from "./components/Recommendations";
 import Resources from "./components/Resources";
+import ThreatsMapping from "./components/ThreatMapping";
 
 const AppRoutes = [
     {
@@ -29,6 +30,10 @@ const AppRoutes = [
     {
         path: '/resources',
         element: <Resources />
+    },
+    {
+        path: '/map',
+        element: <ThreatsMapping />
     }
 ];
 

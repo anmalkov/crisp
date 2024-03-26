@@ -229,7 +229,7 @@ const AddThreatModel = () => {
             </FormGroup>
             {selectedRecommendationsCount > 0 ? (
                 <FormGroup switch className="mb-3">
-                    <Input className="form-check-input me-3" type="switch" role="switch" checked={addResourcesRecommendations} onChange={() => setAddResourcesRecommendations(!addResourcesRecommendations)} /> Add resources recommendations to threats (preview)
+                    <Input className="form-check-input me-3" type="switch" role="switch" checked={addResourcesRecommendations} onChange={() => setAddResourcesRecommendations(!addResourcesRecommendations)} /> Add resources recommendations to threats
                 </FormGroup>
             ) : null}
             {addResourcesRecommendations ? (

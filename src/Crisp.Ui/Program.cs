@@ -2,21 +2,23 @@ using Crisp.Core.Repositories;
 using Crisp.Core.Services;
 using Crisp.Ui.Extensions;
 using Crisp.Ui.Requests;
-using MediatR;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddMediatR(m => m.AsScoped(), typeof(Program));
+builder.Services.AddMediatR(config => {
+    config.Lifetime = ServiceLifetime.Scoped;
+    config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+});
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 
-//builder.Services.AddSingleton<IGitHubRepository, GitHubRepository>();
 builder.Services.AddSingleton<IGitHubRepository, GitHubGitRepository>();
 builder.Services.AddSingleton<ICategoriesRepository, CategoriesRepository>();
 builder.Services.AddSingleton<IThreatModelCategoriesRepository, ThreatModelCategoriesRepository>();
 builder.Services.AddSingleton<IThreatModelsRepository, ThreatModelsRepository>();
 builder.Services.AddSingleton<IReportsRepository, ReportsRepository>();
-builder.Services.AddSingleton<ISecurityBenchmarksRepository, SecurityBenchmarksV11Repository>();
+builder.Services.AddSingleton<ISecurityBenchmarksRepository, SecurityBenchmarksV3Repository>();
 
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IThreatModelsService, ThreatModelsService>();
@@ -36,6 +38,7 @@ app.MediateGet<GetCategoriesRequest>("/api/categories");
 
 app.MediateGet<GetResourcesRequest>("/api/resources");
 app.MediatePost<GetRecommendationsRequest>("/api/resources/recommendations");
+app.MediateGet<GetBenchmarkControlsRequest>("/api/benchmark/controls");
 
 app.MediateGet<GetThreatModelsRequest>("/api/threatmodels");
 app.MediateGet<GetThreatModelCategoriesRequest>("/api/threatmodels/categories");
