@@ -1,10 +1,20 @@
 /* Provide sufficient contrast against white background */
-a {
+a, .btn-link {
   color: #0366d6;
+  text-decoration: none;
+}
+
+a:hover, .btn-link:hover {
+  color: #0366d6;
+  text-decoration: underline;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+.btn-link {
+    padding: 0;
 }
 
 code {
@@ -18,10 +28,24 @@ code {
 }
 
 svg {
-    margin-top: -4px;
+  margin-top: -4px;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }
 
 @media (prefers-color-scheme: dark) {
+    a, .btn-link {
+        color: #2899f5;
+        text-decoration: none;
+    }
+
+    a:hover, .btn-link:hover {
+        color: #3aa0f3;
+        text-decoration: underline;
+    }
+
     .table {
         --bs-table-hover-color: white;
         --bs-table-hover-bg: #111111;
@@ -72,5 +96,39 @@ svg {
         background-color: #333333 !important;
         color: #afafaf !important;
         border-color: #666666 !important;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        background-color: #333333 !important;
+        color: #dddddd !important;
+    }
+
+    .dropdown-menu {
+        background-color: #333333;
+        color: #afafaf;
+        border-color: #666666;
+    }
+
+    .dropdown-item {
+        color: #afafaf;
+    }
+
+    .disabled.dropdown-item {
+        color: #6f6f6f !important;
+    }
+
+    .dropdown-item:hover {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .modal-content {
+        background-color: #1a1a1a;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        border-color: #454d55;
     }
 }

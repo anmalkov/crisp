@@ -28,7 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\models\Threat.ts" />
+    <None Remove="ClientApp\src\models\ThreatRecommendation.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Crisp.Core\Crisp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\models\Threat.ts" />
+    <TypeScriptCompile Include="ClientApp\src\models\ThreatRecommendation.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

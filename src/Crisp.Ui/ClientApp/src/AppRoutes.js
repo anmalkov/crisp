@@ -1,6 +1,6 @@
 import Home from "./components/Home";
 import ThreatModels from "./components/ThreatModels";
-import AddThreatModel from "./components/AddThreatModel";
+import ThreatModel from "./components/threat-model/ThreatModel";
 import ThreatModelReport from "./components/ThreatModelReport";
 import Recommendations from "./components/Recommendations";
 import Resources from "./components/Resources";
@@ -17,7 +17,7 @@ const AppRoutes = [
     },
     {
         path: '/addthreatmodel',
-        element: <AddThreatModel />
+        element: <ThreatModel />
     },
     {
         path: '/threatmodelreport',

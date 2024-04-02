@@ -19,7 +19,7 @@ public record ThreatModel(
     DateTime? UpdatedAt,
     bool AddResourcesRecommendations,
     IEnumerable<DataflowAttribute> DataflowAttributes,
-    IEnumerable<Recommendation> Threats,
+    IEnumerable<Threat> Threats,
     IDictionary<string, string>? Images,
     IEnumerable<string>? Resources
 ) : IStorableItem;

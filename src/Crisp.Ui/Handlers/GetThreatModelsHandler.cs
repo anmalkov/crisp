@@ -23,7 +23,7 @@ namespace Crisp.Ui.Handlers
         DateTime? UpdatedAt,
         bool AddResourcesRecommendations,
         IEnumerable<DataflowAttributeDto> DataflowAttributes,
-        IEnumerable<RecommendationDto> Threats,
+        IEnumerable<ThreatDto> Threats,
         IEnumerable<KeyValuePair<string, string>>? Images,
         IEnumerable<string>? Resources
     );
@@ -68,7 +68,7 @@ namespace Crisp.Ui.Handlers
                 p.UpdatedAt,
                 p.AddResourcesRecommendations,
                 p.DataflowAttributes.Select(MapDataflowAttributeToDto).ToArray(),
-                p.Threats.Select(MapRecommendationToDto).ToArray(),
+                p.Threats.Select(MapThreatToDto).ToArray(),
                 p.Images,
                 p.Resources
             )).ToArray();
@@ -86,13 +86,27 @@ namespace Crisp.Ui.Handlers
             );
         }
 
-        private static RecommendationDto MapRecommendationToDto(Recommendation recommendation)
+        private static ThreatDto MapThreatToDto(Threat threat)
         {
-            return new RecommendationDto(
+            return new ThreatDto(
+                threat.Id,
+                threat.Title,
+                threat.Description,
+                threat.Status,
+                threat.Risk,
+                threat.OrderIndex,
+                threat.Recommendations?.Select(MapThreatRecommendationToDto).ToArray(),
+                threat.BenchmarkIds
+            );
+        }
+
+        private static ThreatRecommendationDto MapThreatRecommendationToDto(ThreatRecommendation recommendation)
+        {
+            return new ThreatRecommendationDto(
                 recommendation.Id,
                 recommendation.Title,
                 recommendation.Description,
-                recommendation.BenchmarkIds
+                recommendation.OrderIndex
             );
         }
     }

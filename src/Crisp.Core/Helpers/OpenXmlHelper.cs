@@ -63,7 +63,7 @@ public static class OpenXmlHelper
         }
     }
 
-    public static void AddThreats(Stream stream, IEnumerable<Recommendation> threats,
+    public static void AddThreats(Stream stream, IEnumerable<Threat> threats,
         IDictionary<string, IEnumerable<SecurityBenchmark>>? benchmarks)
     {
         using var document = WordprocessingDocument.Open(stream, isEditable: true);

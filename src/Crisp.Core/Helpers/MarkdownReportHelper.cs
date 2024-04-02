@@ -32,7 +32,7 @@ public static class MarkdownReportHelper
         return section.ToString().TrimEnd(Environment.NewLine.ToCharArray());
     }
 
-    public static string GenerateResourcesRecommendationsForThreat(Recommendation threat,
+    public static string GenerateResourcesRecommendationsForThreat(Threat threat,
         IDictionary<string, IEnumerable<SecurityBenchmark>>? benchmarks)
     {
         if (threat.BenchmarkIds is null || !threat.BenchmarkIds.Any() || benchmarks is null)

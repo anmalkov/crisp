@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Spinner, ListGroup, Alert, Button, Badge } from 'reactstrap';
 import { useQuery } from 'react-query';
-import { fetchCategory } from '../fetchers/categories';
+import { fetchCatalogRecommendations } from '../fetchers/recommendations';
 import Category from './Category';
 import { useEffect } from 'react';
 import './Recommendations.css';
@@ -9,7 +9,7 @@ import './Recommendations.css';
 
 const Recommendations = () => {
 
-    const { isError, isLoading, data, error } = useQuery(['category'], fetchCategory, { staleTime: 24*60*60*1000 });
+    const { isError, isLoading, data, error } = useQuery(['catalog-recommendations'], fetchCatalogRecommendations, { staleTime: 24*60*60*1000 });
     const category = data;
 
     const [selectedList, setSelectedList] = useState([]);
